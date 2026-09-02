@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+// import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { BackHandler, StyleSheet, View } from 'react-native';
 
 import { ConfirmationDialog } from '@/components/game/ConfirmationDialog';
@@ -10,12 +12,12 @@ import { GameInstruction } from '@/components/game/GameInstruction';
 import { GameScreen } from '@/components/game/GameScreen';
 import { ObjectGrid } from '@/components/game/ObjectGrid';
 import { ProgressIndicator } from '@/components/game/ProgressIndicator';
-import {
-  NORMAL_PICTOGRAPH,
-  OBJECT_COUNT,
-  ODD_OBJECT_INDEX,
-  ODD_PICTOGRAPH,
-} from '@/games/find-odd-one/assets';
+// import {
+//   NORMAL_PICTOGRAPH,
+//   OBJECT_COUNT,
+//   ODD_OBJECT_INDEX,
+//   ODD_PICTOGRAPH,
+// } from '@/games/find-odd-one/assets';
 import { useOddOneGame } from '@/games/find-odd-one/use-odd-one-game';
 import { useLanguage } from '@/i18n/language-context';
 import { speakText, stopSpeaking } from '@/i18n/speech';
@@ -45,21 +47,28 @@ export default function FindOddOneGameScreen() {
   const instruction = `${t('game.findDifferent')} ${t('game.takeYourTime')}`;
   const roundLabel = fill(t('game.round'), { n: game.roundNumber, total: game.totalRounds });
 
-  const gridOrder = useMemo(() => {
-    const rest = Array.from({ length: OBJECT_COUNT }, (_, i) => i).filter(
-      (i) => i !== ODD_OBJECT_INDEX,
-    );
-    const order = [...rest];
-    order.splice(game.oddIndex, 0, ODD_OBJECT_INDEX);
-    return order;
-  }, [game.oddIndex]);
+  // const gridOrder = useMemo(() => {
+  //   const rest = Array.from({ length: OBJECT_COUNT }, (_, i) => i).filter(
+  //     (i) => i !== ODD_OBJECT_INDEX,
+  //   );
+  //   const order = [...rest];
+  //   order.splice(game.oddIndex, 0, ODD_OBJECT_INDEX);
+  //   return order;
+  // }, [game.oddIndex]);
 
-  const choices = gridOrder.map((index) => ({
+  // const choices = gridOrder.map((index) => ({
+  //   index,
+  //   label: fill(t('game.object'), { n: index + 1 }),
+  //   icon: index === ODD_OBJECT_INDEX ? ODD_PICTOGRAPH : NORMAL_PICTOGRAPH,
+  //   isOdd: index === ODD_OBJECT_INDEX,
+  // }));
+  const choices = game.currentObjects.map((object, index) => ({
     index,
     label: fill(t('game.object'), { n: index + 1 }),
-    icon: index === ODD_OBJECT_INDEX ? ODD_PICTOGRAPH : NORMAL_PICTOGRAPH,
-    isOdd: index === ODD_OBJECT_INDEX,
+    source: object.source,
+    isOdd: object.id === game.currentRound?.oddOneId,
   }));
+  
 
   const advanceHandledRef = useRef(false);
 
