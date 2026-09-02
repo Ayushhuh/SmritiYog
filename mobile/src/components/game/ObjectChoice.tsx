@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppIcon } from '@/components/AppIcon';
 import { AppText } from '@/components/AppText';
@@ -6,11 +6,12 @@ import { useFocusable } from '@/components/use-focusable';
 import type { GameStatus } from '@/games/find-odd-one/use-odd-one-game';
 import { spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+import type { ImageSourcePropType } from 'react-native';
 
 type ObjectChoiceProps = {
   index: number;
   label: string;
-  icon: string;
+  source: ImageSourcePropType;
   isOdd: boolean;
   size: number;
   status: GameStatus;
@@ -21,7 +22,7 @@ type ObjectChoiceProps = {
 export function ObjectChoice({
   index,
   label,
-  icon,
+  source,
   isOdd,
   size,
   status,
@@ -33,8 +34,9 @@ export function ObjectChoice({
 
   const isCorrect = isOdd && status === 'correct';
   const isWrong = chosenIndex === index && status === 'wrong';
-  const iconCircleSize = Math.min(Math.round(size * 0.52), 96);
-  const iconSize = Math.round(iconCircleSize * 0.5);
+
+  const imageCircleSize = Math.min(Math.round(size * 0.58), 120);
+  const imageSize = Math.round(imageCircleSize * 0.78);
 
   return (
     <Pressable
@@ -43,7 +45,10 @@ export function ObjectChoice({
       onBlur={onBlur}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled: status !== 'idle', selected: isCorrect }}
+      accessibilityState={{
+        disabled: status !== 'idle',
+        selected: isCorrect,
+      }}
       style={({ pressed }) => [
         styles.tile,
         {
@@ -62,30 +67,35 @@ export function ObjectChoice({
         },
       ]}>
       <View style={styles.numberBadge}>
-        <AppText variant="captionMedium" color="muted" accessibilityElementsHidden>
+        <AppText
+          variant="captionMedium"
+          color="muted"
+          accessibilityElementsHidden>
           {index + 1}
         </AppText>
       </View>
 
       <View
         style={[
-          styles.iconCircle,
+          styles.imageCircle,
           {
-            width: iconCircleSize,
-            height: iconCircleSize,
-            borderRadius: iconCircleSize / 2,
+            width: imageCircleSize,
+            height: imageCircleSize,
+            borderRadius: imageCircleSize / 2,
             backgroundColor: isCorrect
               ? colors.secondary
-              : isWrong
-                ? colors['surface.warm']
-                : colors['surface.warm'],
+              : colors['surface.warm'],
             borderColor: colors.background,
           },
         ]}>
-        <AppIcon
-          name={icon}
-          color={isCorrect ? colors.onSecondary : isOdd ? colors['accent.sun'] : colors.secondary}
-          size={iconSize}
+        <Image
+          source={source}
+          style={{
+            width: imageSize,
+            height: imageSize,
+          }}
+          resizeMode="contain"
+          accessibilityIgnoresInvertColors
         />
       </View>
 
@@ -98,8 +108,16 @@ export function ObjectChoice({
       </AppText>
 
       {isCorrect ? (
-        <View style={[styles.checkBadge, { backgroundColor: colors.secondary }]}>
-          <AppIcon name="check" color={colors.onSecondary} size={18} />
+        <View
+          style={[
+            styles.checkBadge,
+            { backgroundColor: colors.secondary },
+          ]}>
+          <AppIcon
+            name="check"
+            color={colors.onSecondary}
+            size={18}
+          />
         </View>
       ) : null}
     </Pressable>
@@ -114,6 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: spacing.sm,
   },
+
   numberBadge: {
     position: 'absolute',
     top: spacing.sm,
@@ -124,14 +143,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconCircle: {
+
+  imageCircle: {
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
   },
+
   label: {
     textAlign: 'center',
   },
+
   checkBadge: {
     position: 'absolute',
     right: spacing.sm,
