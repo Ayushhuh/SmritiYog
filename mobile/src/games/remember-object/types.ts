@@ -116,6 +116,7 @@ export type RememberRound = {
 export type RememberState = {
   level: Level;
   gameState: GameStateName;
+  hintUsed: boolean;
 
   roundIndex: number;
   totalRounds: number;
