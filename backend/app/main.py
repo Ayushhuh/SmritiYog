@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app import database
-from app.routers import auth, patients, users
+from app.routers import auth, game_sessions, patients, users
 
 
 @asynccontextmanager
@@ -47,3 +47,4 @@ async def health() -> dict[str, str]:
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(patients.router)
+app.include_router(game_sessions.router)
