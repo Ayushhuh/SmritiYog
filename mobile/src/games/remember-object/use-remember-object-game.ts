@@ -61,7 +61,7 @@ function freshState(
 
     storyText: '',
     hintText: '',
-
+    hintUsed: false,
     gameId,
     sessionId,
 
@@ -541,10 +541,18 @@ export function useRememberObjectGame(level: Level = 'easy') {
    *
    * The screen will call this when the patient requests it.
    */
-  const useHint = useCallback(() => {
+   const useHint = useCallback(() => {
     if (state.level !== 'hard') {
       return;
     }
+
+    if (state.gameState !== GAME_STATES.RECALL) {
+      return;
+    }
+
+    if (state.hintUsed) {
+      return;
+    }  
 
     if (!currentRound?.hint) {
       return;
@@ -553,11 +561,15 @@ export function useRememberObjectGame(level: Level = 'easy') {
     setState((previous) => ({
       ...previous,
       hintText:
-        previous.hintText ||
-        currentRound.hint?.en ||
-        '',
+        currentRound.hint?.en ?? '',
+      hintUsed: true,
     }));
-  }, [currentRound, state.level]);
+  }, [
+    state.level,
+    state.gameState,
+    state.hintUsed,
+    currentRound,
+  ]);
 
   const clearHint = useCallback(() => {
     setState((previous) => ({
