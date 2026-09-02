@@ -1,0 +1,363 @@
+{
+  "gameConfig": {
+    "gameId": "GAME_3_PERSONALIZATION",
+    "gameName": "Emotional Game 3 - Family Recognition & Memory",
+    "version": "1.0.0",
+    "description": "Multi-level personalized quiz based on family stories from caregiver portal. Tests memory recall through photo-name matching, story details, and name-filling challenges.",
+    "domain": "emotional",
+    "cognitive_areas": ["memory", "recognition", "language"],
+    "targetAudience": "elderly_dementia_patients"
+  },
+
+  "difficultyLevels": {
+    "easy": {
+      "level": 1,
+      "name": "Easy",
+      "questionType": "direct_photo_name_matching",
+      "format": "multiple_choice",
+      "description": "Direct photo-name matching with immediate family members",
+      "questionExamples": [
+        "Who is this? (photo shown)",
+        "Name your 3 children",
+        "Who is your wife?",
+        "Who is Ayush? (your eldest child)"
+      ],
+      "answerFormat": "voice_input_or_tap",
+      "photoUsage": true,
+      "namesRedacted": false,
+      "scopeOfPeople": ["spouse", "children", "daily_caregivers"],
+      "minCorrectChoices": 3,
+      "maxChoices": 4
+    },
+    "medium": {
+      "level": 2,
+      "name": "Medium",
+      "questionType": "story_recall",
+      "format": "multiple_choice_with_photo",
+      "description": "Recall story details. Question repeats the story, asks specific details",
+      "questionExamples": [
+        "We told you: Ayush's birthday - Manvi accidentally dropped the cake. Who burned the cake?",
+        "Your 50th anniversary - Aryaan gave your wife a pen gift. Who gave the gift?",
+        "On Ayush's birthday, taxi ride with who? (people who went with you)"
+      ],
+      "answerFormat": "voice_input_or_tap",
+      "photoUsage": true,
+      "namesRedacted": false,
+      "orderMatters": false,
+      "scopeOfPeople": ["spouse", "children", "extended_family"],
+      "minCorrectChoices": 3,
+      "maxChoices": 4
+    },
+    "hard": {
+      "level": 3,
+      "name": "Hard",
+      "questionType": "name_filling_with_redaction",
+      "format": "fill_in_blanks",
+      "description": "Story redacted with blanks. Patient fills in missing names. Order matters if sequence-based",
+      "questionExamples": [
+        "____ ki 20th birthday pr ____ ne cake gira diya (fill both blanks)",
+        "Your ____th anniversary, ____ gave a ____ gift (3-blank sequence)"
+      ],
+      "answerFormat": "voice_input_or_tap",
+      "photoUsage": false,
+      "namesRedacted": true,
+      "orderMatters": true,
+      "scopeOfPeople": ["all_family_members"],
+      "minBlanks": 1,
+      "maxBlanks": 5,
+      "sequenceValidation": true
+    }
+  },
+
+  "accuracyModel": {
+    "scoringRules": {
+      "correct_answer": {
+        "score": 100,
+        "condition": "Patient answer exactly matches expected answer (after string comparison by Gemini)"
+      },
+      "family_member_wrong_category": {
+        "score": 50,
+        "condition": "Patient named a family member but wrong category (e.g., named parent instead of child)"
+      },
+      "family_member_outside_scope": {
+        "score": 25,
+        "condition": "Patient named someone from family but not the right person (e.g., wrong child)"
+      },
+      "not_family_member": {
+        "score": 0,
+        "condition": "Patient named someone not in the family tree at all"
+      }
+    },
+    "sessionAccuracyCalculation": {
+      "method": "average_across_all_answers",
+      "formula": "(score1 + score2 + score3 + ... + scoreN) / N",
+      "example": "(33 + 25 + 100 + 0 + 25) / 5 = 36.67%",
+      "sent_to_caregiver": true,
+      "reportFormat": "daily_summary"
+    },
+    "difficultyAdaptation": {
+      "trigger": "3_consecutive_wrong_answers",
+      "definition_wrong": "score < 50 (anything 25 or below)",
+      "action": "downgrade_level",
+      "example": "If hard level: 3 wrong → medium; if medium: 3 wrong → easy",
+      "upgranding_rules": {
+        "enabled": true,
+        "trigger": "5_consecutive_correct_answers",
+        "definition_correct": "score >= 100",
+        "action": "upgrade_level"
+      }
+    }
+  },
+
+  "familyStructure": {
+    "dataSource": "caregiver_portal",
+    "schema": {
+      "person": {
+        "id": "person_uuid",
+        "name": "full_name",
+        "photo_url": "base64_or_path",
+        "dob": "yyyy-mm-dd",
+        "notes": "short_biographical_info"
+      },
+      "relationship": {
+        "person_id": "uuid_of_person_a",
+        "related_to_id": "uuid_of_patient",
+        "relation_type": "spouse | child | parent | sibling | grandchild | other"
+      },
+      "story": {
+        "id": "story_uuid",
+        "title": "event_title",
+        "date": "yyyy-mm-dd",
+        "description": "full_story_text",
+        "involved_people": ["person_id_1", "person_id_2"],
+        "emotional_weight": "high | medium | low",
+        "category": "birthday | anniversary | achievement | daily_memory"
+      }
+    },
+    "fetchMethod": "RAG_agent_queries",
+    "storageLocation": "question_forming_agent_db_only"
+  },
+
+  "questionFormationFlow": {
+    "step1_caregiver_input": {
+      "description": "Caregiver enters stories via portal",
+      "data_captured": ["event_title", "involved_people", "story_text", "photos", "emotional_weight"]
+    },
+    "step2_rag_agent": {
+      "description": "RAG agent fetches family data when question generation is triggered",
+      "request": {
+        "endpoint": "/rag/fetch-family-context",
+        "method": "POST",
+        "body": {
+          "patient_id": "uuid",
+          "caregiver_id": "uuid",
+          "current_difficulty_level": "easy | medium | hard",
+          "limit": 10,
+          "filters": {
+            "emotional_weight": "high",
+            "recent_days": 90
+          }
+        }
+      },
+      "response": {
+        "stories": [
+          {
+            "id": "story_uuid",
+            "title": "Ayush's 20th Birthday",
+            "text": "Ayush ki 20th birthday pr Manvi ne cake gira diya aur Aryaan aur sab hasne lage",
+            "involved_people": [
+              { "id": "person_1", "name": "Ayush", "relation": "child", "role": "birthday_person" },
+              { "id": "person_2", "name": "Manvi", "relation": "child", "role": "cake_dropper" },
+              { "id": "person_3", "name": "Aryaan", "relation": "child", "role": "laughed" }
+            ],
+            "photos": ["photo_url_ayush", "photo_url_cake"]
+          }
+        ],
+        "family_tree": [
+          { "id": "patient_uuid", "name": "Sharma (Patient)", "role": "patient" },
+          { "id": "person_1", "name": "Ayush", "relation": "eldest_child" },
+          { "id": "person_2", "name": "Manvi", "relation": "middle_child" },
+          { "id": "person_3", "name": "Aryaan", "relation": "youngest_child" },
+          { "id": "person_4", "name": "Priya", "relation": "spouse" }
+        ]
+      }
+    },
+    "step3_question_forming_agent": {
+      "description": "Question agent generates difficulty-appropriate questions using story + family context",
+      "request": {
+        "endpoint": "/question-agent/generate",
+        "method": "POST",
+        "body": {
+          "story": {
+            "id": "story_uuid",
+            "text": "Ayush ki 20th birthday pr Manvi ne cake gira diya aur Aryaan aur sab hasne lage",
+            "involved_people": ["Ayush", "Manvi", "Aryaan"]
+          },
+          "family_context": {
+            "patient": "Sharma",
+            "spouse": "Priya",
+            "children": ["Ayush", "Manvi", "Aryaan"]
+          },
+          "difficulty": "easy",
+          "current_session_id": "session_uuid"
+        }
+      },
+      "response": {
+        "question": {
+          "id": "q_uuid",
+          "text": "Who accidentally dropped the cake at Ayush's birthday?",
+          "story_context": "Ayush ki 20th birthday pr Manvi ne cake gira diya aur Aryaan aur sab hasne lage",
+          "level": "easy",
+          "type": "multiple_choice",
+          "correct_answer": "Manvi",
+          "possible_answers": ["Manvi", "Aryaan", "Priya", "Ayush"],
+          "answer_explanation": "According to the family story, Manvi dropped the cake at Ayush's birthday celebration",
+          "photo": "photo_url_manvi",
+          "expected_transcription_variants": ["Manvi", "manvi", "mani", "Monvi"]
+        }
+      }
+    }
+  },
+
+  "gameSession": {
+    "sessionId": "session_uuid_20240905_1000",
+    "gameId": "GAME_3_PERSONALIZATION",
+    "patientId": "patient_uuid",
+    "caregiverId": "caregiver_uuid",
+    "startTime": "2024-09-05T10:00:00Z",
+    "endTime": "2024-09-05T10:08:30Z",
+    "duration_seconds": 510,
+    "device": "mobile_app",
+    "offline": false,
+    "initialDifficulty": "easy",
+    "finalDifficulty": "easy",
+    "difficultyChanges": [],
+    "questionsAsked": 5,
+    "questionsCorrect": 1,
+    "questionsWrong": 4,
+    "sessionAccuracy": 36.67,
+    "rounds": [
+      {
+        "roundNumber": 1,
+        "questionId": "q_uuid_001",
+        "text": "Who is Ayush?",
+        "level": "easy",
+        "type": "direct_photo_name_matching",
+        "photo": "photo_url_ayush",
+        "story": "Ayush is your eldest child",
+        "questionAskedAt": "2024-09-05T10:00:30Z",
+        "patientAnswerRaw": "ayush",
+        "patientAnswerTranscribed": "Ayush",
+        "patientAnswerTranscriptionMethod": "gemini_speech_to_text",
+        "correctAnswer": "Ayush",
+        "score": 100,
+        "timeTaken": 8,
+        "engagement": {
+          "lingering_on_photo": true,
+          "photo_view_duration_ms": 2500
+        },
+        "accuracy_category": "correct"
+      },
+      {
+        "roundNumber": 2,
+        "questionId": "q_uuid_002",
+        "text": "Name your 3 children in order of age",
+        "level": "easy",
+        "type": "direct_recall",
+        "story": "Your children are Ayush (eldest), Manvi (middle), Aryaan (youngest)",
+        "questionAskedAt": "2024-09-05T10:01:30Z",
+        "patientAnswerRaw": "Ayush, Aryaan, Manvi",
+        "patientAnswerTranscribed": "Ayush, Aryaan, Manvi",
+        "patientAnswerTranscriptionMethod": "gemini_speech_to_text",
+        "correctAnswer": "Ayush, Manvi, Aryaan",
+        "answerBreakdown": {
+          "option_1": { "given": "Ayush", "expected": "Ayush", "score": 100 },
+          "option_2": { "given": "Aryaan", "expected": "Manvi", "score": 25, "reason": "family_member_wrong_category" },
+          "option_3": { "given": "Manvi", "expected": "Aryaan", "score": 25, "reason": "family_member_wrong_category" }
+        },
+        "score": 33.33,
+        "timeTaken": 12,
+        "accuracy_category": "partially_wrong",
+        "wrongAttempts": 0
+      },
+      {
+        "roundNumber": 3,
+        "questionId": "q_uuid_003",
+        "text": "Who burned the cake at Ayush's birthday?",
+        "level": "easy",
+        "type": "story_recall_with_photo",
+        "story": "Ayush ki 20th birthday pr Manvi ne cake gira diya aur Aryaan aur sab hasne lage",
+        "photo": "photo_url_manvi",
+        "questionAskedAt": "2024-09-05T10:02:45Z",
+        "patientAnswerRaw": "Aryaan",
+        "patientAnswerTranscribed": "Aryaan",
+        "patientAnswerTranscriptionMethod": "gemini_speech_to_text",
+        "correctAnswer": "Manvi",
+        "score": 25,
+        "wrongAttempts": 1,
+        "reason": "named_family_member_but_wrong_person",
+        "timeTaken": 9,
+        "accuracy_category": "wrong"
+      },
+      {
+        "roundNumber": 4,
+        "questionId": "q_uuid_004",
+        "text": "On Ayush's birthday, who went to the taxi with you?",
+        "level": "easy",
+        "type": "story_detail_recall",
+        "story": "On Ayush ki bday, taxi mai Ayush, Manvi, Aryaan, aur Priya gaye",
+        "questionAskedAt": "2024-09-05T10:04:00Z",
+        "patientAnswerRaw": "Priya, Ayush",
+        "patientAnswerTranscribed": "Priya, Ayush",
+        "patientAnswerTranscriptionMethod": "gemini_speech_to_text",
+        "correctAnswer": "Ayush, Manvi, Aryaan, Priya",
+        "answerBreakdown": {
+          "given_count": 2,
+          "expected_count": 4,
+          "given_names": ["Priya", "Ayush"],
+          "missing_names": ["Manvi", "Aryaan"]
+        },
+        "score": 50,
+        "wrongAttempts": 1,
+        "reason": "partial_recall_but_missing_people",
+        "timeTaken": 11,
+        "accuracy_category": "wrong"
+      },
+      {
+        "roundNumber": 5,
+        "questionId": "q_uuid_005",
+        "text": "Your 50th anniversary - who gave a gift?",
+        "level": "easy",
+        "type": "story_detail_recall",
+        "story": "Your 50th anniversary, Aryaan ne apni wife ko pen gift kiya tha",
+        "questionAskedAt": "2024-09-05T10:05:30Z",
+        "patientAnswerRaw": "Priya",
+        "patientAnswerTranscribed": "Priya",
+        "patientAnswerTranscriptionMethod": "gemini_speech_to_text",
+        "correctAnswer": "Aryaan",
+        "score": 0,
+        "wrongAttempts": 2,
+        "reason": "not_correct_person_at_all",
+        "timeTaken": 7,
+        "accuracy_category": "completely_wrong",
+        "skipAfterAttempts": true,
+        "skipReason": "3_wrong_answers_in_session"
+      }
+    ],
+    "sessionSummary": {
+      "totalAccuracy": 36.67,
+      "formula": "(100 + 33.33 + 25 + 50 + 0) / 5",
+      "sent_to_caregiver": true,
+      "timestamp": "2024-09-05T10:08:30Z",
+      "caregiver_notification": {
+        "title": "Daily Cognitive Session - 36.67% Accuracy",
+        "message": "Today's session: 5 questions, 1 correct. Accuracy declining. Recommend reviewing family photos together.",
+        "recommendations": [
+          "Spend time looking at family photos",
+          "Retell family stories together",
+          "Consider easier difficulty level in next session"
+        ]
+      }
+    }
+  }
+}
