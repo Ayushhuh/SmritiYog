@@ -8,16 +8,56 @@ export type MemoryObject = {
 };
 
 export const OBJECTS: Record<ObjectId, MemoryObject> = {
-  apple: { id: 'apple', icon: 'apple-alt', image: null },
-  key: { id: 'key', icon: 'key', image: null },
-  pillow: { id: 'pillow', icon: 'bed', image: null },
-  door: { id: 'door', icon: 'door-open', image: null },
-  cup: { id: 'cup', icon: 'mug-hot', image: null },
-  book: { id: 'book', icon: 'book', image: null },
-  chair: { id: 'chair', icon: 'chair', image: null },
-  spoon: { id: 'spoon', icon: 'utensil-spoon', image: null },
-  clock: { id: 'clock', icon: 'clock', image: null },
-  tree: { id: 'tree', icon: 'tree', image: null },
+  apple: {
+    id: 'apple',
+    icon: 'apple-alt',
+    image: require('../../../assets/remember-object/apple.png'),
+  },
+  key: {
+    id: 'key',
+    icon: 'key',
+    image: require('../../../assets/remember-object/key.png'),
+  },
+  pillow: {
+    id: 'pillow',
+    icon: 'bed',
+    image: require('../../../assets/remember-object/pillow.png'),
+  },
+  door: {
+    id: 'door',
+    icon: 'door-open',
+    image: require('../../../assets/remember-object/door.png'),
+  },
+  cup: {
+    id: 'cup',
+    icon: 'mug-hot',
+    image: require('../../../assets/remember-object/cup.png'),
+  },
+  book: {
+    id: 'book',
+    icon: 'book',
+    image: require('../../../assets/remember-object/book.png'),
+  },
+  chair: {
+    id: 'chair',
+    icon: 'chair',
+    image: require('../../../assets/remember-object/chair.png'),
+  },
+  spoon: {
+    id: 'spoon',
+    icon: 'utensil-spoon',
+    image: require('../../../assets/remember-object/spoon.png'),
+  },
+  clock: {
+    id: 'clock',
+    icon: 'clock',
+    image: require('../../../assets/remember-object/clock.png'),
+  },
+  tree: {
+    id: 'tree',
+    icon: 'tree',
+    image: require('../../../assets/remember-object/tree.png'),
+  },
 };
 
 export const OBJECT_NAMES: Record<Language, Record<ObjectId, string>> = {
@@ -118,16 +158,25 @@ export type Deal = {
 
 function shuffled<T>(items: readonly T[]): T[] {
   const copy = [...items];
+
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
+
   return copy;
 }
 
-export function createDeal(objectCount: number, optionCount: number): Deal {
+export function createDeal(
+  objectCount: number,
+  optionCount: number,
+): Deal {
   const order = shuffled(OBJECT_IDS);
   const targets = order.slice(0, objectCount);
-  const options = shuffled([...targets, ...order.slice(objectCount, optionCount)]);
+  const options = shuffled([
+    ...targets,
+    ...order.slice(objectCount, optionCount),
+  ]);
+
   return { targets, options };
 }

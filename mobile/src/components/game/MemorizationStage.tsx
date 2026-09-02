@@ -7,23 +7,26 @@ import { spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 type MemorizationStageProps = {
-  object: MemoryObject;
-  name: string;
-  currentIndex: number;
-  total: number;
+  objects?: MemoryObject[];
+  object?: MemoryObject;
   rememberLabel: string;
-  numberLabel: string;
+  numberLabel?: string;
 };
 
 export function MemorizationStage({
+  objects,
   object,
-  name,
-  currentIndex,
-  total,
   rememberLabel,
   numberLabel,
 }: MemorizationStageProps) {
   const { colors } = useTheme();
+
+  const displayObjects =
+    objects && objects.length > 0
+      ? objects
+      : object
+        ? [object]
+        : [];
 
   return (
     <View style={styles.container} accessibilityLiveRegion="polite">
@@ -31,63 +34,80 @@ export function MemorizationStage({
         {rememberLabel}
       </AppText>
 
-      <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        {Array.from({ length: total }, (_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              { backgroundColor: index < currentIndex ? colors.primary : colors.border },
-            ]}
-          />
+      {numberLabel ? (
+        <AppText variant="captionMedium" color="muted" style={styles.number}>
+          {numberLabel}
+        </AppText>
+      ) : null}
+
+      <View style={styles.objectsRow}>
+        {displayObjects.map((item) => (
+          <View key={item.id} style={styles.objectWrap}>
+            <ObjectVisual object={item} size={150} />
+          </View>
         ))}
       </View>
 
-      <AppText variant="captionMedium" color="muted" style={styles.number}>
-        {numberLabel}
+      <AppText variant="bodyLarge" color="primary" style={styles.instruction}>
+        Remember all the objects
       </AppText>
 
-      <View style={styles.objectWrap}>
-        <ObjectVisual object={object} size={190} />
+      <View
+        style={[
+          styles.progressBar,
+          { backgroundColor: colors.border },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            { backgroundColor: colors.primary },
+          ]}
+        />
       </View>
-
-      <AppText variant="bodyLarge" color="primary" style={styles.name}>
-        {name}
-      </AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.lg,
-    paddingHorizontal: spacing.lg,
+    width: '100%',
   },
   heading: {
     textAlign: 'center',
-  },
-  dots: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  dot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    marginBottom: spacing.md,
   },
   number: {
-    marginTop: -spacing.sm,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  objectsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
   },
   objectWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.lg,
   },
-  name: {
+  instruction: {
     textAlign: 'center',
-    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  progressBar: {
+    width: '80%',
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 4,
   },
 });
