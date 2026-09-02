@@ -483,6 +483,8 @@ export default function RememberObjectScreen() {
         <RecallGrid
           options={state.recallOptions}
           selectedIds={state.selectedObjectIds}
+          selectedOrder={state.selectedOrder}
+          ordered={state.level === 'hard'}
           nameOf={(id) => objectName(id, language)}
           onSelect={handleSelect}
         />
