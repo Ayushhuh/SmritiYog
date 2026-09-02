@@ -565,6 +565,25 @@ export function useRememberObjectGame(level: Level = 'easy') {
     }));
   }, []);
 
+
+    const setLevel = useCallback((nextLevel: Level) => {
+      setState((previous) => {
+        if (previous.gameState !== GAME_STATES.INTRO) {
+          return previous;
+        }
+
+        return freshState(
+          nextLevel,
+          0,
+          previous.gameId,
+          previous.sessionId,
+        );
+      });
+
+      setTapCount(0);
+      setDelayRemainingMs(0);
+    }, []);
+  
   return {
     state,
     rules,
@@ -582,7 +601,7 @@ export function useRememberObjectGame(level: Level = 'easy') {
     tapCount,
 
     begin,
-
+    setLevel,
     /*
      * Easy.
      */
