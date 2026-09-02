@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
-
+import { RememberSpeechInput } from '@/components/game/RememberSpeechInput';
 import { AppIcon } from '@/components/AppIcon';
 import { AppText } from '@/components/AppText';
 import { ConfirmationDialog } from '@/components/game/ConfirmationDialog';
@@ -42,11 +42,13 @@ export default function RememberObjectScreen() {
     roundNumber,
     totalRounds,
     delayRemainingSeconds,
+    tapCount,
     begin,
     finishMemorization,
     startDelay,
     tapDistractor,
     toggleObject,
+    applySpeechTranscript,
     useHint,
     check,
     finish,
@@ -431,7 +433,7 @@ export default function RememberObjectScreen() {
         <AppText
           variant="captionMedium"
           color="muted">
-          Taps: {state.selectedObjectIds.length * 0 + 0}
+          Taps: {tapCount}
         </AppText>
       </View>
     );
@@ -489,6 +491,17 @@ export default function RememberObjectScreen() {
           onSelect={handleSelect}
         />
 
+        {state.level !== 'easy' ? (
+          <RememberSpeechInput
+            language={language}
+            contextualStrings={state.recallOptions.map((id) =>
+              objectName(id, language),
+            )}
+            onTranscript={applySpeechTranscript}
+            disabled={state.selectedObjectIds.length >= rules.objectCount}
+          />
+        ) : null}
+        
         <View style={styles.footer}>
           <AppText
             variant="captionMedium"
