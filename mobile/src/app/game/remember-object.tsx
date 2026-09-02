@@ -44,6 +44,7 @@ export default function RememberObjectScreen() {
     delayRemainingSeconds,
     tapCount,
     begin,
+    setLevel,
     finishMemorization,
     startDelay,
     tapDistractor,
