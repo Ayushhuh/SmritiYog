@@ -466,7 +466,7 @@ export default function RememberObjectScreen() {
           repeatLabel={t('speak')}
         />
 
-        {ordered && !hint ? (
+        {ordered && !state.hintUsed ? (
           <GameButton
             label="Hint"
             onPress={handleHint}
