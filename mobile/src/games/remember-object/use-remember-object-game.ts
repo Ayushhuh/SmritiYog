@@ -475,6 +475,7 @@ export function useRememberObjectGame(level: Level = 'easy') {
         return {
           ...previous,
           gameState: GAME_STATES.COMPLETE,
+          correctCount: previous.score,
         };
       }
 
