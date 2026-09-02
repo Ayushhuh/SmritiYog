@@ -62,3 +62,57 @@ class CaregiverPatient(Base):
     )
 
     patient: Mapped["Patient"] = sqlalchemy_relationship(back_populates="caregivers")
+
+
+class GameSession(Base):
+    __tablename__ = "game_sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    game_id: Mapped[str] = mapped_column(
+        String(100),
+        index=True,
+    )
+
+    session_id: Mapped[str] = mapped_column(
+        String(100),
+        unique=True,
+        index=True,
+    )
+
+    patient_id: Mapped[int] = mapped_column(
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        index=True,
+    )
+
+    caregiver_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+    )
+
+    level: Mapped[str] = mapped_column(
+        String(20),
+    )
+
+    score: Mapped[int] = mapped_column(
+        default=0,
+    )
+
+    total_rounds: Mapped[int] = mapped_column(
+        default=5,
+    )
+
+    completed: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
