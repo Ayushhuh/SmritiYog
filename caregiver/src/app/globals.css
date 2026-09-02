@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  /* SmritiYog Canonical Palette */
+  --color-background: #FFF8EF;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FFF1DF;
+  --color-text-primary: #2B2118;
+  --color-text-secondary: #5A4A3B;
+  --color-text-muted: #766A5F;
+  --color-primary: #C65D3A;
+  --color-primary-dark: #9E452A;
+  --color-secondary: #2F8F83;
+  --color-accent-sun: #E6A23C;
+  --color-danger: #C95656;
+  --color-on-primary: #FFFFFF;
+  --color-on-secondary: #FFFFFF;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 40px;
+  --space-4xl: 48px;
+
+  /* Radius */
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-text-primary);
+  --color-surface: var(--color-surface);
+  --color-surface-warm: var(--color-surface-warm);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-secondary: var(--color-secondary);
+  --color-accent-sun: var(--color-accent-sun);
+  --color-danger: var(--color-danger);
+  --color-on-primary: var(--color-on-primary);
+  --color-on-secondary: var(--color-on-secondary);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+/* Focus ring utility */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.2s ease;
+}
