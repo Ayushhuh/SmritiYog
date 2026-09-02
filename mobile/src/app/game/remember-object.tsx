@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
-import { RememberSpeechInput } from '@/components/game/RememberSpeechInput';
+import { RememberSpeechInput } from '@/app/game/RememberSpeechInput';
 import { AppIcon } from '@/components/AppIcon';
 import { AppText } from '@/components/AppText';
 import { ConfirmationDialog } from '@/components/game/ConfirmationDialog';
