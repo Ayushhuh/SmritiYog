@@ -93,3 +93,32 @@ class PatientRead(BaseModel):
 
 class PatientWithRelationship(PatientRead):
     relationship: str
+
+
+class GameSessionCreate(BaseModel):
+    game_id: str = Field(min_length=1, max_length=100)
+    session_id: str = Field(min_length=1, max_length=100)
+    patient_id: int
+    level: str = Field(min_length=1, max_length=20)
+    total_rounds: int = Field(default=5, ge=1)
+
+
+class GameSessionUpdate(BaseModel):
+    score: int = Field(default=0, ge=0)
+    completed: bool = False
+
+
+class GameSessionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    game_id: str
+    session_id: str
+    patient_id: int
+    caregiver_id: int
+    level: str
+    score: int
+    total_rounds: int
+    completed: bool
+    created_at: datetime
+    completed_at: datetime | None
